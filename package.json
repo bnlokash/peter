@@ -1,0 +1,19 @@
+{
+  "name": "peter",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Benjamin Lokash <benjaminlokash@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "ts-node --transpile-only index.ts"
+  },
+  "dependencies": {
+    "axios": "^0.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.6",
+    "ts-node": "^10.4.0",
+    "tslib": "^2.3.1",
+    "typescript": "^4.5.4"
+  }
+}
