@@ -8,6 +8,10 @@
     "start": "ts-node --transpile-only index.ts"
   },
   "dependencies": {
+    "@turf/bearing": "^6.5.0",
+    "@turf/destination": "^6.5.0",
+    "@turf/helpers": "^6.5.0",
+    "@turf/rhumb-destination": "^6.5.0",
     "axios": "^0.24.0"
   },
   "devDependencies": {
