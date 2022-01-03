@@ -2,6 +2,7 @@ import axios from 'axios'
 import destination from '@turf/rhumb-destination'
 import { point } from '@turf/helpers'
 import bearing from '@turf/bearing'
+import LatLon from 'geodesy/latlon-spherical'
 
 const HERE_TOKEN = 'cHE2xvF-Osj95kuUjuNuhhqHWyWhV4II9BATBWXmYw4'
 
@@ -83,24 +84,56 @@ const betweenPoints = async (xml) => {
     const firstPoint = getFirstPointCoords(xml.highway, betweenParts[0])
 }
 
+const getBearingWeights = (ordinal, distance) => {
+    // if (ordinal = 'north') {
+        return { lat: distance * 0.5, long: distance * 0.5 }
+    // }
+}
+
 const addDistanceToCoords = (distance, ordinal, coords) => {
     const { lat, long } = coords
     const earthRadiusKm = 6378
     // const kmPerDegreeOfLong = (Math.PI /180) * earthRadiusKm * Math.cos((Number(lat) * Math.PI)/180)
 
-    const distanceInKm = distance / 1000
 
-    const newLat = lat + (distanceInKm / earthRadiusKm) * (180/Math.PI)
-    const newLong = long + (0 / earthRadiusKm) * (180 / Math.PI) / Math.cos(lat * Math.PI/180)
+    const distanceInKm = distance / 1000
+    // const bearingWeights = getBearingWeights(ordinal, distanceInKm)
+
+    const newLat = lat + (0 / earthRadiusKm) * (180/Math.PI)
+    const newLong = long + (-distanceInKm / earthRadiusKm) * (180 / Math.PI) / Math.cos(lat * Math.PI/180)
 
     return { lat: newLat, long: newLong}
 }
 
 
+// doesn't work
+const addDistance2 = (distance, coords, bearing) => {
+    const { lat, long } = coords
+    const earthRadiusKm = 6378
+    const R = earthRadiusKm
+    const distanceInKm = distance / 1000
+
+const newLat = Math.asin( (Math.sin(lat)*Math.cos(distanceInKm/R)) + (Math.cos(lat)*Math.sin(distanceInKm/R)*Math.cos(bearing)) );
+
+const newLong = long + Math.atan2(Math.sin(bearing)*Math.sin(distanceInKm/R)*Math.cos(lat),Math.cos(distanceInKm/R)-Math.sin(lat)*Math.sin(newLat));
+
+return { lat: newLat, long: newLong }
+}
+
+// WORKS
+const geoDistance = (distance, coords, bearing) => {
+    const p1 = new LatLon(coords.lat, coords.long)
+    const p2 = p1.destinationPoint(distance, bearing)
+    console.log('geo', p2)
+    return p2
+}
 
 // betweenIntersections(xml1)
 // betweenPoints(xml2)
 console.log('start', 43.66821, -79.3298)
-const end = addDistanceToCoords(29, 'north', { lat: 43.66821, long: -79.3298 })
-const end2 = destination(point([43.66821, -79.3298]), 29, -90, { units: 'meters'})
-console.log('end', end, end2)
+// const end = addDistanceToCoords(29, 'north', { lat: 43.66821, long: -79.3298 })
+// const end2 = destination(point([43.66821, -79.3298]), 29, -90, { units: 'meters'})
+// const end = addDistance2(29, {lat: 43.66821, long: -79.3298}, 0)
+// console.log('end', end.lat, end.long)
+const {lat, lon} = geoDistance(29, {lat: 43.66821, long: -79.3298}, 340)
+console.log('end', lat, lon)
