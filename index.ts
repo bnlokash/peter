@@ -3,6 +3,9 @@ import destination from '@turf/rhumb-destination'
 import { point } from '@turf/helpers'
 import bearing from '@turf/bearing'
 import LatLon from 'geodesy/latlon-spherical'
+import { XMLParser, XMLBuilder, XMLValidator} from 'fast-xml-parser'
+import fs from 'fs'
+
 
 const HERE_TOKEN = 'cHE2xvF-Osj95kuUjuNuhhqHWyWhV4II9BATBWXmYw4'
 
@@ -120,10 +123,15 @@ const newLong = long + Math.atan2(Math.sin(bearing)*Math.sin(distanceInKm/R)*Mat
 return { lat: newLat, long: newLong }
 }
 
+const bearingToDegrees = (bearing) => (({
+    north: 343,
+    south: 170
+})[bearing])
+
 // WORKS
 const geoDistance = (distance, coords, bearing) => {
     const p1 = new LatLon(coords.lat, coords.long)
-    const p2 = p1.destinationPoint(distance, bearing)
+    const p2 = p1.destinationPoint(distance, bearingToDegrees(bearing))
     console.log('geo', p2)
     return p2
 }
@@ -135,5 +143,28 @@ console.log('start', 43.66821, -79.3298)
 // const end2 = destination(point([43.66821, -79.3298]), 29, -90, { units: 'meters'})
 // const end = addDistance2(29, {lat: 43.66821, long: -79.3298}, 0)
 // console.log('end', end.lat, end.long)
-const {lat, lon} = geoDistance(29, {lat: 43.66821, long: -79.3298}, 340)
-console.log('end', lat, lon)
+
+
+// const {lat, lon} = geoDistance(250, {lat: 43.66821, long: -79.3298}, 'south')
+// console.log(lat, lon)
+
+
+///// BEGIN PIPELINE
+const main = () => {
+    const buffer = fs.readFileSync('xml/chapter950/Ch_950_Sch_15_ParkingForRestrictedPeriods_current_to_Feb242021.xml');
+    const fileContent = buffer.toString();
+    // console.log(fileContent)
+
+    const parser = new XMLParser();
+    let jObj = parser.parse(fileContent);
+
+    const builder = new XMLBuilder({});
+    const xmlContent = builder.build(jObj);
+    for (const [key, value] of Object.entries(xmlContent)) {
+        if (key === '11') {
+            console.log(value)
+        }
+    }
+}
+
+main()
